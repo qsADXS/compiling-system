@@ -1,4 +1,4 @@
-package lexer;
+package src.lexer;
 
 /**
  * TokenSpecificType 表示更具体的子类型

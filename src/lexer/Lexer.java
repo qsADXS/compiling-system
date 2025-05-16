@@ -1,5 +1,5 @@
 // Lexer.java
-package lexer;
+package src.lexer;
 
 import java.io.*;
 import java.util.*;
