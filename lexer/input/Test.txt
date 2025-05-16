@@ -1,0 +1,46 @@
+package lexer;
+
+import java.util.****;
+/*
+    寻找两数之和，哈希表
+ */
+
+public class Test {
+    public List<List<Integer>> twoSumAll(int[] nums, int target,int x) {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        List<List<Integer>> result = new ArrayList<>();
+
+        // 遍历数组中的每个元素
+        for (int i = 0; i < nums.length; i++) {
+            inr complement = target - nums[i];
+
+            // 如果补数已经在哈希表中，说明找到了结果
+            if (map.containsKey(complement)) {
+                for (Integer index : map.get(complement)) {
+                    if(index!=x&&i!=x){
+                        result.add(Arrays.asList(index, i,x));
+                    }
+
+                }
+            }
+
+            // 把当前元素的索引加入哈希表
+            map.putIfAbsent(nums[i], new ArrayList<>());
+            map.get(nums[i]).add(i);
+        }
+
+        return result;
+    }
+
+    public static void main(String[] args) {
+        Test twoSum = new Test();
+        int[] num = {3, 2, 4, 3.897,&;
+        int target = 6;
+        int x = 1;
+        List<List<Integer>> result = twoSum.twoSumAll(nums, target,x);
+
+        for (List<Integer> pair : result) {
+            System.out.println(pair);
+        }
+    }
+}
