@@ -177,49 +177,44 @@ public class LR1Parser {
     }
 
     public void printTables() {
-        System.out.println("ACTION 表:");
+        // 合并所有符号
+        List<String> allSymbols = new ArrayList<>(terminals);
+        allSymbols.addAll(nonTerminals);
+        allSymbols.remove("S'"); // 移除增广文法符号
+        Collections.sort(allSymbols);
+
+        // 打印表头
+        System.out.println("LR(1) 分析表");
         System.out.print("状态\t");
-        List<String> sortedTerminals = new ArrayList<>(terminals);
-        Collections.sort(sortedTerminals);
-        for (String t : sortedTerminals) {
-            System.out.print(t + "\t");
+        for (String symbol : allSymbols) {
+            System.out.print(symbol + "\t");
         }
         System.out.println();
 
+        // 打印表格内容
         for (int i = 0; i < states.size(); i++) {
             System.out.print(i + "\t");
-            for (String t : sortedTerminals) {
-                if (actionTable.containsKey(i) && actionTable.get(i).containsKey(t)) {
-                    System.out.print(actionTable.get(i).get(t) + "\t");
+            for (String symbol : allSymbols) {
+                if (terminals.contains(symbol)) {
+                    // 处理 ACTION 表部分
+                    if (actionTable.containsKey(i) && actionTable.get(i).containsKey(symbol)) {
+                        System.out.print(actionTable.get(i).get(symbol) + "\t");
+                    } else {
+                        System.out.print("\t");
+                    }
                 } else {
-                    System.out.print("\t");
-                }
-            }
-            System.out.println();
-        }
-
-        System.out.println("\nGOTO 表:");
-        System.out.print("状态\t");
-        List<String> sortedNonTerminals = new ArrayList<>(nonTerminals);
-        Collections.sort(sortedNonTerminals);
-        sortedNonTerminals.remove("S'");
-        for (String nt : sortedNonTerminals) {
-            System.out.print(nt + "\t");
-        }
-        System.out.println();
-
-        for (int i = 0; i < states.size(); i++) {
-            System.out.print(i + "\t");
-            for (String nt : sortedNonTerminals) {
-                if (gotoTable.containsKey(i) && gotoTable.get(i).containsKey(nt)) {
-                    System.out.print(gotoTable.get(i).get(nt) + "\t");
-                } else {
-                    System.out.print("\t");
+                    // 处理 GOTO 表部分
+                    if (gotoTable.containsKey(i) && gotoTable.get(i).containsKey(symbol)) {
+                        System.out.print(gotoTable.get(i).get(symbol) + "\t");
+                    } else {
+                        System.out.print("\t");
+                    }
                 }
             }
             System.out.println();
         }
     }
+
 
     public boolean parse(List<String> input) {
         input = new ArrayList<>(input);
@@ -229,24 +224,26 @@ public class LR1Parser {
         stateStack.push(0);
         int ip = 0;
 
+        // 打印表头
         System.out.println("\n分析过程:");
-        System.out.println("栈\t\t\t输入\t\t动作");
+        System.out.println(
+                String.format("%-50s %-50s %-50s %s",
+                        "状态栈", "符号栈", "剩余输入", "动作")
+        );
+        printAnalysisStep(stateStack, symbolStack, input, ip, "初始化");
 
         while (true) {
             int currentState = stateStack.peek();
             String currentSymbol = input.get(ip);
 
-            System.out.print(stateStack + " " + symbolStack + "\t" +
-                    input.subList(ip, input.size()) + "\t");
-
             if (!actionTable.containsKey(currentState) ||
                     !actionTable.get(currentState).containsKey(currentSymbol)) {
-                System.out.println("错误: 在状态 " + currentState + " 遇到 " + currentSymbol);
+                printAnalysisStep(stateStack, symbolStack, input, ip,
+                        "错误: 在状态 " + currentState + " 遇到 " + currentSymbol);
                 return false;
             }
 
             String action = actionTable.get(currentState).get(currentSymbol);
-            System.out.println(action);
 
             if (action.startsWith("s")) {
                 // 移进动作
@@ -254,6 +251,7 @@ public class LR1Parser {
                 stateStack.push(nextState);
                 symbolStack.push(currentSymbol);
                 ip++;
+                printAnalysisStep(stateStack, symbolStack, input, ip, "移进: " + action);
             } else if (action.startsWith("r")) {
                 // 归约动作
                 int grammarIndex = Integer.parseInt(action.substring(1));
@@ -261,21 +259,46 @@ public class LR1Parser {
                 int popCount = grammar.rhs.size();
                 if (grammar.rhs.get(0).equals("ε")) popCount = 0;
 
+                // 弹出栈
                 for (int i = 0; i < popCount; i++) {
                     stateStack.pop();
                     symbolStack.pop();
                 }
 
+                // 压入新符号
                 symbolStack.push(grammar.lhs);
+
+                // 查找GOTO表
                 int gotoState = gotoTable.get(stateStack.peek()).get(grammar.lhs);
                 stateStack.push(gotoState);
+                printAnalysisStep(stateStack, symbolStack, input, ip,
+                        "归约: " + action + " (" + grammar + ")");
             } else if (action.equals("acc")) {
+                // 接受
+                printAnalysisStep(stateStack, symbolStack, input, ip, "接受");
                 System.out.println("分析成功!");
                 return true;
             } else {
-                System.out.println("未知动作: " + action);
+                printAnalysisStep(stateStack, symbolStack, input, ip,
+                        "未知动作: " + action);
                 return false;
             }
         }
+    }
+
+    // 打印分析步骤的辅助方法
+    private void printAnalysisStep(Stack<Integer> stateStack,
+                                   Stack<String> symbolStack,
+                                   List<String> input,
+                                   int ip,
+                                   String action) {
+        String stateStr = stateStack.toString();
+        String symbolStr = symbolStack.toString();
+        String inputStr = input.subList(ip, input.size()).toString();
+
+        System.out.println(
+                String.format("%-50s %-50s %-50s %s",
+                        stateStr, symbolStr, inputStr, action)
+        );
     }
 }
