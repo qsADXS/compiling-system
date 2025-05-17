@@ -1,5 +1,5 @@
 // TokenType.java
-package lexer;
+package src.lexer;
 
 /**
  * TokenType 表示词法单元的大类
@@ -15,6 +15,6 @@ public enum TokenType {
     DELIMITER,
     RESERVED,
     IDENTIFIER,
-    ERROR
+    ERROR,
 }
 
