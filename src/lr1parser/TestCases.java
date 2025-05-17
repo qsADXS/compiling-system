@@ -5,18 +5,15 @@ import java.util.List;
 
 public class TestCases {
     public static void main(String[] args) {
-        // 测试用例1: 简单算术表达式
         testArithmeticExpression();
 
-        // 测试用例2: 简单if语句
         testIfStatement();
 
-        // 测试用例3: 简单声明语句
         testDeclaration();
     }
 
     private static void testArithmeticExpression() {
-        System.out.println("=== 测试用例1: 简单算术表达式 ===");
+        System.out.println("=== 测试用例1 ===");
 
         List<Grammar> grammars = Arrays.asList(
                 new Grammar("E", Arrays.asList("E", "+", "T")),
@@ -36,7 +33,7 @@ public class TestCases {
     }
 
     private static void testIfStatement() {
-        System.out.println("\n=== 测试用例2: 简单if语句 ===");
+        System.out.println("\n=== 测试用例2 ===");
 
         List<Grammar> grammars = Arrays.asList(
                 new Grammar("S", Arrays.asList("if", "E", "then", "S", "else", "S")),
@@ -54,7 +51,7 @@ public class TestCases {
     }
 
     private static void testDeclaration() {
-        System.out.println("\n=== 测试用例3: 简单声明语句 ===");
+        System.out.println("\n=== 测试用例3 ===");
 
         List<Grammar> grammars = Arrays.asList(
                 new Grammar("D", Arrays.asList("T", "id", ";", "D")),
