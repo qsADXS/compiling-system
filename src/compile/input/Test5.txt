@@ -1,0 +1,7 @@
+{
+    int[6] arr;
+    int[1] arr2;
+    {
+        int[123] arr;
+    }
+}
